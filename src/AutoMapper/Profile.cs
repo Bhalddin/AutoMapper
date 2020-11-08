@@ -45,6 +45,8 @@ namespace AutoMapper
         bool? IProfileConfiguration.ConstructorMappingEnabled => _constructorMappingEnabled;
         bool? IProfileExpressionInternal.MethodMappingEnabled { get; set; }
         bool? IProfileConfiguration.MethodMappingEnabled => this.Internal().MethodMappingEnabled;
+        bool? IProfileExpressionInternal.FieldMappingEnabled { get; set; }
+        bool? IProfileConfiguration.FieldMappingEnabled => this.Internal().FieldMappingEnabled;
         bool? IProfileConfiguration.EnableNullPropagationForQueryMapping => this.Internal().EnableNullPropagationForQueryMapping;
         IEnumerable<Action<PropertyMap, IMemberConfigurationExpression>> IProfileConfiguration.AllPropertyMapActions
             => _allPropertyMapActions;

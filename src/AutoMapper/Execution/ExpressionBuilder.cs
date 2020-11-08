@@ -36,7 +36,7 @@ namespace AutoMapper.Execution
             if (typeMap != null)
             {
                 hasTypeConverter = typeMap.HasTypeConverter;
-                if (!typeMap.HasDerivedTypesToInclude())
+                if (!typeMap.HasDerivedTypesToInclude)
                 {
                     typeMap.Seal(configurationProvider);
 
@@ -159,11 +159,17 @@ namespace AutoMapper.Execution
         public static Expression NullSubstitute(this IMemberMap memberMap, Expression sourceExpression) =>
             Coalesce(sourceExpression, ToType(Constant(memberMap.NullSubstitute), sourceExpression.Type));
 
-        public static Expression ApplyTransformers(this IMemberMap memberMap, Expression source) =>
-            memberMap.ValueTransformers
-            .Concat(memberMap.TypeMap.ValueTransformers)
-            .Concat(memberMap.TypeMap.Profile.ValueTransformers)
-            .Where(vt => vt.IsMatch(memberMap))
-            .Aggregate(source, (current, vtConfig) => ToType(vtConfig.TransformerExpression.ReplaceParameters(ToType(current, vtConfig.ValueType)), memberMap.DestinationType));
+        public static Expression ApplyTransformers(this IMemberMap memberMap, Expression source)
+        {
+            var perMember = memberMap.ValueTransformers;
+            var perMap = memberMap.TypeMap.ValueTransformers;
+            var perProfile = memberMap.TypeMap.Profile.ValueTransformers;
+            if (perMember.Count == 0 && perMap.Count == 0 && perProfile.Count == 0)
+            {
+                return source;
+            }
+            return perMember.Concat(perMap).Concat(perProfile).Where(vt => vt.IsMatch(memberMap)).Aggregate(source, 
+                (current, vtConfig) => ToType(vtConfig.TransformerExpression.ReplaceParameters(ToType(current, vtConfig.ValueType)), memberMap.DestinationType));
+        }
     }
 }
